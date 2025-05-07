@@ -5,7 +5,6 @@ import (
 
 	"github.com/morninng/first-microservice/order/internal/application/core/domain"
 	"github.com/morninng/first-proto/golang/payment"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -18,7 +17,6 @@ func NewAdapter(paymentServiceUrl string) (*Adapter, error) {
 	var opts []grpc.DialOption
 	opts = append(opts,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
 	)
 	conn, err := grpc.Dial(paymentServiceUrl, opts...)
 	if err != nil {

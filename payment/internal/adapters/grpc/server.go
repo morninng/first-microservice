@@ -8,7 +8,6 @@ import (
 	"github.com/morninng/first-microservice/payment/config"
 	"github.com/morninng/first-microservice/payment/internal/ports"
 	"github.com/morninng/first-proto/golang/payment"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc/reflection"
 
 	"google.golang.org/grpc"
@@ -33,9 +32,7 @@ func (a Adapter) Run() {
 		log.Fatalf("failed to listen on port %d, error: %v", a.port, err)
 	}
 
-	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
-	)
+	grpcServer := grpc.NewServer()
 	a.server = grpcServer
 	payment.RegisterPaymentServer(grpcServer, a)
 	if config.GetEnv() == "development" {
