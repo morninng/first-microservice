@@ -49,6 +49,8 @@ github.com/mattn/go-runewidth v0.0.13 h1:lTGmDsbAYt5DmK6OnoV7EuIF1wEIFAcxld6ypU4
 github.com/mattn/go-runewidth v0.0.13/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
 github.com/morninng/first-proto/golang/order v1.2.8 h1:z4+QTyIeRNbe6l4ulkLxn6i4PnnRZrFnSLrh83A+pIE=
 github.com/morninng/first-proto/golang/order v1.2.8/go.mod h1:RctSlI86YasPpVvcweL83jHkUHV8tdUKaJoakrGcLws=
+github.com/morninng/first-proto/golang/payment v0.0.1 h1:hBY4Op2YY3CJ9h23KmAnbFVSO1ElYXvXZTbUgDJABy8=
+github.com/morninng/first-proto/golang/payment v0.0.1/go.mod h1:rpYLy4xm5rtD3QcYu6TY34QypJeqKvgkyOUvRszNypI=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rivo/uniseg v0.2.0 h1:S1pD9weZBuJdFmowNwbpi7BJ8TNftyUImj/0WQi72jY=
