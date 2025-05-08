@@ -2,13 +2,12 @@ package grpc
 
 import (
 	"fmt"
+	"log"
 	"net"
 
-	"github.com/morninng/first-microservice/order/config"
-	"github.com/morninng/first-microservice/order/internal/ports"
-	"github.com/morninng/first-proto/golang/order"
-
-	log "github.com/sirupsen/logrus"
+	"github.com/morninng/first-microservice/payment/config"
+	"github.com/morninng/first-microservice/payment/internal/ports"
+	"github.com/morninng/first-proto/golang/payment"
 	"google.golang.org/grpc/reflection"
 
 	"google.golang.org/grpc"
@@ -18,7 +17,7 @@ type Adapter struct {
 	api    ports.APIPort
 	port   int
 	server *grpc.Server
-	order.UnimplementedOrderServer
+	payment.UnimplementedPaymentServer
 }
 
 func NewAdapter(api ports.APIPort, port int) *Adapter {
@@ -35,14 +34,14 @@ func (a Adapter) Run() {
 
 	grpcServer := grpc.NewServer()
 	a.server = grpcServer
-	order.RegisterOrderServer(grpcServer, a)
+	payment.RegisterPaymentServer(grpcServer, a)
 	if config.GetEnv() == "development" {
 		reflection.Register(grpcServer)
 	}
 
-	log.Printf("starting order service on port %d ...", a.port)
+	log.Printf("starting payment service on port %d ...", a.port)
 	if err := grpcServer.Serve(listen); err != nil {
-		log.Fatalf("failed to serve grpc on port %d", a.port)
+		log.Fatalf("failed to serve grpc on port ")
 	}
 }
 
