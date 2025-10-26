@@ -26,4 +26,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
-        run: npx ts-node scripts/pr_review_bot.ts
+        run: node --loader ts-node/esm scripts/pr_review_bot.ts
