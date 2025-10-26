@@ -14,7 +14,7 @@ type OrderEntity struct {
 	gorm.Model
 	CustomerID int64
 	Status     string
-	OrderItems []OrderItemEntity
+	OrderItems []OrderItemEntity `gorm:"foreignKey:OrderID"`
 }
 
 // OrderItemEntity represents the database model for an order item
@@ -23,7 +23,7 @@ type OrderItemEntity struct {
 	ProductCode string
 	UnitPrice   float32
 	Quantity    int32
-	OrderID     uint
+	OrderID     uint `gorm:"index"`
 }
 
 // OrderRepository implements repository.OrderPersistence
