@@ -53,9 +53,8 @@ async function run() {
   // 3. Claudeにレビュー依頼
   const reviewPrompt = `
 You are a professional code reviewer.
-Refer to the following specification when reviewing:
 
-Now review the following pull request diff and point out problems, improvements, and spec mismatches:
+Now review the following pull request diff and point out problems, improvements:
 
 ${diffs}
 `;
@@ -70,12 +69,11 @@ ${diffs}
     if (message.type === "assistant") {
       // アシスタントのレスポンスを結合
       console.log("message.message", message.message)
-      reviewText += message.message
-      // for (const block of message.message) {
-      //   if (block.type === "text") {
-      //     reviewText += block.text;
-      //   }
-      // }
+      for (const block of message.message) {
+        if (block.type === "text") {
+          reviewText += block.text;
+        }
+      }
     } else if (message.type === "result") {
       // 最終結果メッセージ
       console.log("Review completed");
