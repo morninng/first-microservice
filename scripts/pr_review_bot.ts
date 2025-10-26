@@ -8,13 +8,36 @@ const claudeApiKey = process.env.CLAUDE_API_KEY!;
 const octokit = new Octokit({ auth: githubToken });
 const repo = process.env.GITHUB_REPOSITORY!;
 const [owner, repoName] = repo.split("/");
-console.log("GITHUB_REF", process.env.GITHUB_REF)
-console.log("PR_NUMBER", process.env.PR_NUMBER)
-const prNumber = process.env.PR_NUMBER || process.env.GITHUB_REF?.split("/").pop();
-console.log("prNumber", prNumber)
+
+async function getPRNumber(): Promise<number> {
+  // If PR_NUMBER is explicitly provided, use it
+  if (process.env.PR_NUMBER) {
+    console.log("Using provided PR_NUMBER:", process.env.PR_NUMBER);
+    return Number(process.env.PR_NUMBER);
+  }
+
+  // Otherwise, find PR by current branch
+  const branchRef = process.env.GITHUB_REF || "";
+  const branchName = branchRef.replace("refs/heads/", "");
+  console.log("Auto-detecting PR for branch:", branchName);
+
+  const { data: pulls } = await octokit.pulls.list({
+    owner,
+    repo: repoName,
+    state: "open",
+    head: `${owner}:${branchName}`,
+  });
+
+  if (pulls.length === 0) {
+    throw new Error(`No open PR found for branch: ${branchName}`);
+  }
+
+  console.log("Found PR #", pulls[0].number);
+  return pulls[0].number;
+}
 
 async function run() {
-  if (!prNumber) throw new Error("PR number not found");
+  const prNumber = await getPRNumber();
 
   // 1. diffを取得
   const { data: files } = await octokit.pulls.listFiles({

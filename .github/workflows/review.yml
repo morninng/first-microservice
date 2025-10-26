@@ -2,6 +2,11 @@ name: PR Review Bot
 
 on:
   workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review (leave empty to auto-detect from current branch)'
+        required: false
+        type: string
 
 jobs:
   review:
@@ -27,4 +32,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+          PR_NUMBER: ${{ inputs.pr_number }}
         run: node --loader ts-node/esm pr_review_bot.ts
