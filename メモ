@@ -17,6 +17,10 @@ docker run -p 3306:3306 \
 mysql -h 127.0.0.1 -P 3306 -u root -p
 SHOW DATABASES;
 
+それぞれのserviceがConnectするDatabaseがないので初めに作成
+CREATE DATABASE payments;
+
+
 
 [launch order service]
 DATA_SOURCE_URL=root:verysecretpass@tcp(127.0.0.1:3306)/order \

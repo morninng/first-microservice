@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/labstack/gommon/log"
 	"github.com/morninng/first-microservice/payment/internal/application/core/domain"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -50,6 +51,7 @@ func (a Adapter) Save(ctx context.Context, payment *domain.Payment) error {
 }
 
 func NewAdapter(dataSourceUrl string) (*Adapter, error) {
+	log.Printf("Connecting to database: %s", dataSourceUrl)
 	db, openErr := gorm.Open(mysql.Open(dataSourceUrl), &gorm.Config{})
 	if openErr != nil {
 		return nil, fmt.Errorf("db connection error: %v", openErr)
