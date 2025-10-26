@@ -66,12 +66,15 @@ ${diffs}
 
   // ストリームからメッセージを取得
   for await (const message of stream) {
+      console.log("message", message)
     if (message.type === "assistant") {
       // アシスタントのレスポンスを結合
-      console.log("message", message)
-      for (const block of message.message.content) {
-        if (block.type === "text") {
-          reviewText += block.text;
+      const content = message.message?.content;
+      if (Array.isArray(content)) {
+        for (const block of content) {
+          if (block.type === "text") {
+            reviewText += block.text;
+          }
         }
       }
     } else if (message.type === "result") {
@@ -79,7 +82,6 @@ ${diffs}
       console.log("Review completed");
     }
   }
-  console.log("reviewText", reviewText)
   if (!reviewText) {
     reviewText = "No comments generated.";
   }
