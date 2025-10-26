@@ -9,6 +9,15 @@
       "envFile": "${workspaceFolder}/order/.env",
       "program": "${workspaceFolder}/order/cmd/",
       "args": []
+    },
+    {
+      "name": "Launch payment server",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "envFile": "${workspaceFolder}/payment/.env",
+      "program": "${workspaceFolder}/payment/cmd/",
+      "args": []
     }
   ]
 }
