@@ -4,7 +4,6 @@ import fs from "fs";
 import path from "path";
 
 const githubToken = process.env.GITHUB_TOKEN!;
-const claudeApiKey = process.env.CLAUDE_API_KEY!;
 const octokit = new Octokit({ auth: githubToken });
 const repo = process.env.GITHUB_REPOSITORY!;
 const [owner, repoName] = repo.split("/");
