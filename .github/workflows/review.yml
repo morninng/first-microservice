@@ -23,7 +23,8 @@ jobs:
         run: npm ci
 
       - name: Run PR Review Bot
+        working-directory: scripts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
-        run: node --loader ts-node/esm scripts/pr_review_bot.ts
+        run: node --loader ts-node/esm pr_review_bot.ts
