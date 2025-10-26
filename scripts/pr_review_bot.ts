@@ -8,7 +8,10 @@ const claudeApiKey = process.env.CLAUDE_API_KEY!;
 const octokit = new Octokit({ auth: githubToken });
 const repo = process.env.GITHUB_REPOSITORY!;
 const [owner, repoName] = repo.split("/");
+console.log("GITHUB_REF", process.env.GITHUB_REF)
+console.log("PR_NUMBER", process.env.PR_NUMBER)
 const prNumber = process.env.PR_NUMBER || process.env.GITHUB_REF?.split("/").pop();
+console.log("prNumber", prNumber)
 
 async function run() {
   if (!prNumber) throw new Error("PR number not found");
