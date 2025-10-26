@@ -68,8 +68,8 @@ ${diffs}
   for await (const message of stream) {
     if (message.type === "assistant") {
       // アシスタントのレスポンスを結合
-      console.log("message.message", message.message)
-      for (const block of message.message) {
+      console.log("message", message)
+      for (const block of message.message.content) {
         if (block.type === "text") {
           reviewText += block.text;
         }
