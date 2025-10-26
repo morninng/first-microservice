@@ -4,14 +4,39 @@ import fs from "fs";
 import path from "path";
 
 const githubToken = process.env.GITHUB_TOKEN!;
-const claudeApiKey = process.env.CLAUDE_API_KEY!;
 const octokit = new Octokit({ auth: githubToken });
 const repo = process.env.GITHUB_REPOSITORY!;
 const [owner, repoName] = repo.split("/");
-const prNumber = process.env.PR_NUMBER || process.env.GITHUB_REF?.split("/").pop();
+
+async function getPRNumber(): Promise<number> {
+  // If PR_NUMBER is explicitly provided, use it
+  if (process.env.PR_NUMBER) {
+    console.log("Using provided PR_NUMBER:", process.env.PR_NUMBER);
+    return Number(process.env.PR_NUMBER);
+  }
+
+  // Otherwise, find PR by current branch
+  const branchRef = process.env.GITHUB_REF || "";
+  const branchName = branchRef.replace("refs/heads/", "");
+  console.log("Auto-detecting PR for branch:", branchName);
+
+  const { data: pulls } = await octokit.pulls.list({
+    owner,
+    repo: repoName,
+    state: "open",
+    head: `${owner}:${branchName}`,
+  });
+
+  if (pulls.length === 0) {
+    throw new Error(`No open PR found for branch: ${branchName}`);
+  }
+
+  console.log("Found PR #", pulls[0].number);
+  return pulls[0].number;
+}
 
 async function run() {
-  if (!prNumber) throw new Error("PR number not found");
+  const prNumber = await getPRNumber();
 
   // 1. diffを取得
   const { data: files } = await octokit.pulls.listFiles({
@@ -24,24 +49,12 @@ async function run() {
     .map((f) => `### ${f.filename}\n\n\`\`\`${f.patch}\`\`\``)
     .join("\n\n");
 
-  // 2. specリポジトリ内の仕様書を読み込む
-  const specDir = path.resolve("specs/specs");
-  const specFiles = fs
-    .readdirSync(specDir)
-    .filter((f) => f.endsWith(".md"))
-    .map((f) => fs.readFileSync(path.join(specDir, f), "utf-8"))
-    .join("\n\n");
 
   // 3. Claudeにレビュー依頼
   const reviewPrompt = `
 You are a professional code reviewer.
-Refer to the following specification when reviewing:
 
---- SPEC START ---
-${specFiles}
---- SPEC END ---
-
-Now review the following pull request diff and point out problems, improvements, and spec mismatches:
+Now review the following pull request diff and point out problems, improvements:
 
 ${diffs}
 `;
@@ -55,7 +68,8 @@ ${diffs}
   for await (const message of stream) {
     if (message.type === "assistant") {
       // アシスタントのレスポンスを結合
-      for (const block of message.message) {
+      console.log("message", message)
+      for (const block of message.message.content) {
         if (block.type === "text") {
           reviewText += block.text;
         }
@@ -65,7 +79,7 @@ ${diffs}
       console.log("Review completed");
     }
   }
-
+  console.log("reviewText", reviewText)
   if (!reviewText) {
     reviewText = "No comments generated.";
   }
