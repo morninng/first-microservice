@@ -70,11 +70,13 @@ ${diffs}
   for await (const message of stream) {
     if (message.type === "assistant") {
       // アシスタントのレスポンスを結合
-      for (const block of message.message) {
-        if (block.type === "text") {
-          reviewText += block.text;
-        }
-      }
+      console.log("message.message", message.message)
+      reviewText += message.message
+      // for (const block of message.message) {
+      //   if (block.type === "text") {
+      //     reviewText += block.text;
+      //   }
+      // }
     } else if (message.type === "result") {
       // 最終結果メッセージ
       console.log("Review completed");
