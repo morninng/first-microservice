@@ -50,22 +50,11 @@ async function run() {
     .map((f) => `### ${f.filename}\n\n\`\`\`${f.patch}\`\`\``)
     .join("\n\n");
 
-  // 2. specリポジトリ内の仕様書を読み込む
-  const specDir = path.resolve("specs/specs");
-  const specFiles = fs
-    .readdirSync(specDir)
-    .filter((f) => f.endsWith(".md"))
-    .map((f) => fs.readFileSync(path.join(specDir, f), "utf-8"))
-    .join("\n\n");
 
   // 3. Claudeにレビュー依頼
   const reviewPrompt = `
 You are a professional code reviewer.
 Refer to the following specification when reviewing:
-
---- SPEC START ---
-${specFiles}
---- SPEC END ---
 
 Now review the following pull request diff and point out problems, improvements, and spec mismatches:
 
@@ -91,7 +80,7 @@ ${diffs}
       console.log("Review completed");
     }
   }
-
+  console.log("reviewText", reviewText)
   if (!reviewText) {
     reviewText = "No comments generated.";
   }
