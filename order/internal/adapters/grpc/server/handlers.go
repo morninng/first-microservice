@@ -11,7 +11,7 @@ import (
 
 // Create handles the creation of a new order
 func (s *OrderServer) Create(ctx context.Context, request *order.CreateOrderRequest) (*order.CreateOrderResponse, error) {
-	log.WithContext(ctx).Info("Creating order... ")
+	log.WithContext(ctx).Info("Creating order... aaa bbb ")
 
 	orderItems := convertToOrderItems(request.OrderItems)
 	newOrder, err := model.NewOrder(request.UserId, orderItems)
