@@ -5,3 +5,4 @@
 
 /.claude
 /scripts/node_modules
+/scripts/.env
