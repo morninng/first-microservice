@@ -17,22 +17,22 @@ async function main() {
   const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
 
   if (missingVars.length > 0) {
-    console.error("L Missing required environment variables:");
+    console.error("Missing required environment variables:");
     missingVars.forEach((varName) => console.error(`   - ${varName}`));
-    console.error("\nPlease create a .env file in the scripts directory with these variables.");
+    console.error("Please create a .env file in the scripts directory with these variables.");
     console.error("See .env.example for reference.\n");
     process.exit(1);
   }
 
   if (!process.env.PR_NUMBER) {
-    console.warn("�  PR_NUMBER not set. Will attempt to auto-detect from GITHUB_REF.\n");
+    console.warn("PR_NUMBER not set. Will attempt to auto-detect from GITHUB_REF.\n");
   }
 
   try {
     await runLocalTest();
-    console.log("\n Successfully completed PR review!");
+    console.log("\n Successfully completed PR review!");
   } catch (error) {
-    console.error("\nL Error running PR review:");
+    console.error("\n Error running PR review:");
     console.error(error);
     process.exit(1);
   }
