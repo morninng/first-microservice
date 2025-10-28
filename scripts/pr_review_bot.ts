@@ -1,14 +1,7 @@
 import { Octokit } from "@octokit/rest";
 import { query } from "@anthropic-ai/claude-agent-sdk";
-import fs from "fs";
-import path from "path";
 
-const githubToken = process.env.GITHUB_TOKEN!;
-const octokit = new Octokit({ auth: githubToken });
-const repo = process.env.GITHUB_REPOSITORY!;
-const [owner, repoName] = repo.split("/");
-
-async function getPRNumber(): Promise<number> {
+async function getPRNumber(octokit: Octokit, owner: string, repoName: string): Promise<number> {
   // If PR_NUMBER is explicitly provided, use it
   if (process.env.PR_NUMBER) {
     console.log("Using provided PR_NUMBER:", process.env.PR_NUMBER);
@@ -35,20 +28,21 @@ async function getPRNumber(): Promise<number> {
   return pulls[0].number;
 }
 
-async function run() {
-  const prNumber = await getPRNumber();
-
-  // 1. diffを取得
+async function getPullRequestDiff(octokit: Octokit, owner: string, repoName: string, prNumber: number): Promise<string> {
   const { data: files } = await octokit.pulls.listFiles({
     owner,
     repo: repoName,
     pull_number: Number(prNumber),
   });
-
   const diffs = files
     .map((f) => `### ${f.filename}\n\n\`\`\`${f.patch}\`\`\``)
     .join("\n\n");
 
+    return diffs;
+}
+
+
+async function getClaudeReviewComment(octokit: Octokit, diffs: string) {
 
   // 3. Claudeにレビュー依頼
   const reviewPrompt = `
@@ -59,7 +53,6 @@ Now review the following pull request diff and point out problems, improvements:
 ${diffs}
 `;
 
-  // 最新のAgent SDKのquery()関数を使用
   const stream = query({prompt: reviewPrompt});
 
   let reviewText = "";
@@ -85,19 +78,64 @@ ${diffs}
   if (!reviewText) {
     reviewText = "No comments generated.";
   }
+  return reviewText;
+}
 
-  // 4. GitHubにコメント投稿
+async function writeCommentOnPullRequest(octokit: Octokit, owner: string, repoName: string, prNumber: number, reviewText: string) {
   await octokit.issues.createComment({
     owner,
     repo: repoName,
     issue_number: Number(prNumber),
     body: `🤖 **Claude PR Review**\n\n${reviewText}`,
   });
-
-  console.log("✅ PR review comment posted.");
 }
 
-run().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+
+
+
+
+export async function runLocalTest() {
+  const githubToken = process.env.GITHUB_TOKEN;
+  if (!githubToken) {
+    throw new Error("GITHUB_TOKEN environment variable is required");
+  }
+
+  const repo = process.env.GITHUB_REPOSITORY;
+  if (!repo) {
+    throw new Error("GITHUB_REPOSITORY environment variable is required");
+  }
+
+  const [owner, repoName] = repo.split("/");
+  const octokit = new Octokit({ auth: githubToken });
+
+  const prNumber = await getPRNumber(octokit , owner, repoName )
+  const diff = await getPullRequestDiff(octokit , owner, repoName, prNumber)
+
+ const reviewComment = await getClaudeReviewComment(octokit, diff)
+ console.log("------------- ")
+ console.log(reviewComment)
+
+}
+
+async function runGithubActionReview() {
+
+  const githubToken = process.env.GITHUB_TOKEN!;
+  const repo = process.env.GITHUB_REPOSITORY!;
+  const [owner, repoName] = repo.split("/");
+  const octokit = new Octokit({ auth: githubToken });
+
+  const prNumber = await getPRNumber(octokit , owner, repoName )
+  const diff = await getPullRequestDiff(octokit , owner, repoName, prNumber)
+  const reviewComment = await getClaudeReviewComment(octokit, diff)
+  await writeCommentOnPullRequest(octokit,  owner, repoName, prNumber, reviewComment )
+
+}
+
+
+// Only run if this file is executed directly (not imported)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  runGithubActionReview().catch((e: Error) => {
+    console.error(e);
+    process.exit(1);
+  });
+}
