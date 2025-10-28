@@ -2,13 +2,12 @@ import { Octokit } from "@octokit/rest";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 
 async function getPRNumber(octokit: Octokit, owner: string, repoName: string): Promise<number> {
-  // If PR_NUMBER is explicitly provided, use it
   if (process.env.PR_NUMBER) {
     console.log("Using provided PR_NUMBER:", process.env.PR_NUMBER);
     return Number(process.env.PR_NUMBER);
   }
 
-  // Otherwise, find PR by current branch
+  // find PR by current branch
   const branchRef = process.env.GITHUB_REF || "";
   const branchName = branchRef.replace("refs/heads/", "");
   console.log("Auto-detecting PR for branch:", branchName);
@@ -37,14 +36,11 @@ async function getPullRequestDiff(octokit: Octokit, owner: string, repoName: str
   const diffs = files
     .map((f) => `### ${f.filename}\n\n\`\`\`${f.patch}\`\`\``)
     .join("\n\n");
-
     return diffs;
 }
 
 
-async function getClaudeReviewComment(octokit: Octokit, diffs: string) {
-
-  // 3. Claudeにレビュー依頼
+async function getClaudeReviewComment( diffs: string) {
   const reviewPrompt = `
 You are a professional code reviewer.
 
@@ -90,10 +86,6 @@ async function writeCommentOnPullRequest(octokit: Octokit, owner: string, repoNa
   });
 }
 
-
-
-
-
 export async function runLocalTest() {
   const githubToken = process.env.GITHUB_TOKEN;
   if (!githubToken) {
@@ -111,7 +103,7 @@ export async function runLocalTest() {
   const prNumber = await getPRNumber(octokit , owner, repoName )
   const diff = await getPullRequestDiff(octokit , owner, repoName, prNumber)
 
- const reviewComment = await getClaudeReviewComment(octokit, diff)
+ const reviewComment = await getClaudeReviewComment( diff)
  console.log("------------- ")
  console.log(reviewComment)
 
@@ -126,7 +118,7 @@ async function runGithubActionReview() {
 
   const prNumber = await getPRNumber(octokit , owner, repoName )
   const diff = await getPullRequestDiff(octokit , owner, repoName, prNumber)
-  const reviewComment = await getClaudeReviewComment(octokit, diff)
+  const reviewComment = await getClaudeReviewComment( diff)
   await writeCommentOnPullRequest(octokit,  owner, repoName, prNumber, reviewComment )
 
 }
